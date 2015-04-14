@@ -1,6 +1,6 @@
-setwd("C:/Users/timole/Documents/Solita/N4S/Lupapiste/usage/analysis")
-
-ue <- read.csv("../data/lupapiste-usage-events-3months.tsv", sep = "\t", row.names = NULL)
+#setwd("C:/Users/timole/Documents/Solita/N4S/Lupapiste/usage/analysis")
+setwd("D:/user/terhoh/workspace/lupis/analysis")
+ue <- read.csv("../data/lupapiste-usage-events-3months-small.tsv", sep = "\t", row.names = NULL)
 ue$datetime <- strftime(ue$datetime, "%Y-%m-%d %H:%M:%OS3")
 ue <- ue[with(ue, order(applicationId, datetime)), ]
 
