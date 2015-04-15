@@ -7,6 +7,10 @@
 #ue2 <- ue2[with(ue2, order(applicationId, datetime)), ]
 
 
+#install the plyr which contains the handy count function
+install.packages("plyr")
+library(plyr)
+
 ue3 <- read.csv("../data/lupapiste-usage-events-all-20150414.tsv", sep = "\t", row.names = NULL)
 ue3$datetime <- strftime(ue$datetime, "%Y-%m-%d %H:%M:%OS3")
 ue3 <- ue3[with(ue3, order(applicationId, datetime)), ]
