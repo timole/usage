@@ -12,8 +12,12 @@ library(kohonen)
 #uf.som <- som(data = uf.sc)
 uf[is.na(uf)] <- 0
 data_train <- uf[,-(1),drop=FALSE]
+
+data_train <- data_train[data_train$"freq.publish-verdict">0,]
+
 data_train_matrix <- as.matrix(scale(data_train))
-som_grid <- somgrid(xdim = 20, ydim=20, topo="hexagonal")
+data_train_matrix[is.na(data_train_matrix)] <- 0
+som_grid <- somgrid(xdim = 5, ydim=4, topo="hexagonal")
 som_model <- som(data_train_matrix, 
                  grid=som_grid, 
                  rlen=100, 
