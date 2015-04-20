@@ -1,5 +1,5 @@
 # Data is expected in data.frame format in "uf" variable
-
+install.packages('kohonen')
 library(kohonen)
 
 # Change data into matrix format
@@ -10,10 +10,13 @@ library(kohonen)
 #uf.sc <- scale(uf_matrix)
 #set.seed(7)
 #uf.som <- som(data = uf.sc)
+Sys.time()
 uf[is.na(uf)] <- 0
 data_train <- uf[,-(1),drop=FALSE]
 data_train_matrix <- as.matrix(scale(data_train))
+Sys.time()
 som_grid <- somgrid(xdim = 20, ydim=20, topo="hexagonal")
+Sys.time()
 som_model <- som(data_train_matrix, 
                  grid=som_grid, 
                  rlen=100, 
@@ -21,3 +24,4 @@ som_model <- som(data_train_matrix,
                  keep.data = TRUE,
                  n.hood="circular" )
 
+Sys.time()
