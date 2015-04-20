@@ -8,13 +8,13 @@
 
 
 #install the plyr which contains the handy count function
-install.packages("plyr")
+#install.packages("plyr")
 library(plyr)
 
-ue3 <- read.csv("../data/lupapiste-usage-events-all-20150414.tsv", sep = "\t", row.names = NULL)
+#ue3 <- read.csv("../data/lupapiste-usage-events-all-20150414.tsv", sep = "\t", row.names = NULL)
 #convert date to POSIX format
-ue3$datetime <- strftime(ue$datetime, "%Y-%m-%d %H:%M:%OS3")
-#order list 
+ue3$datetime <- strftime(ue3$datetime, "%Y-%m-%d %H:%M:%OS3")
+#order list
 ue3 <- ue3[with(ue3, order(applicationId, datetime)), ]
 
 
@@ -30,9 +30,22 @@ length(unique(ue3$applicationId))
 ue3max <- max(ue3$datetime)
 ue3min <- min(ue3$datetime)
 
+# Merge action and target columns
+ue3$Action <- paste(ue3$action, ue3$target)
+ue3[, "Action"] <- ue3$Action
+ue3 <- subset(ue3, select = -c(action,target) )
 
+library(data.table)
 # a better way to do it...
-ue3AppIdVsAction <- table(ue3$applicationId, ue3$action )
+ue3AppIdVsAction <- data.table(ue3$applicationId, ue3$Action )
+setnames(ue3AppIdVsAction, 1:2, c("applicationId", "Action"))
 
 #amount of uniqueIds
-ue3UniqueIds <- length(unique(ue3$applicationId))
+#ue3UniqueIds <- length(unique(ue3$applicationId))
+
+#create table from data and count applicationId vs. actions
+table1 <- count(ue3AppIdVsAction, c("applicationId","Action"))
+table2 <- reshape(table1, v.names="freq", idvar="applicationId",timevar="Action",direction="wide")
+
+
+
