@@ -2,6 +2,8 @@
 #install.packages("plyr")
 library(plyr)
 
+install.packages('data.table')
+
 # Import data into "ue" in RStudio or.. do the following
 #ue <- read.csv("../data/lupapiste-usage-events-all-20150414.tsv", sep = "\t", row.names = NULL)
 
