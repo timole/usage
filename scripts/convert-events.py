@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 
 # curl -k -u lupapiste:$password https://upcsplunk.solita.fi:8089/servicesNS/nobody/search/search/jobs/export --data-urlencode search="search source=\"/home/lupapiste/logs/events.log\" earliest=-3months | regex _raw=\"\\\"type\\\":\\\"command\\\""" -d output_mode=csv > lupapiste-usage-dump-3months.csv
-
+# curl -k -u lupapiste:$password https://upcsplunk.solita.fi:8089/servicesNS/nobody/search/search/jobs/export --data-urlencode search='search source="/home/lupapiste/logs/events.log" | regex _raw=\"type\":\"command\"' -d output_mode=csv
 import re, sys, json
+
+a = None
 
 def parseColumnNames(f):
     line = f.readline()
@@ -36,6 +38,7 @@ targetIds = {}
 targetIdSeq = 100000
 
 parsed = 0
+errors = 0
 for line in f:
     fields = line.split(',')
     datetime = re.match("\"(.*) .*", fields[1]).group(1)
@@ -47,7 +50,9 @@ for line in f:
     try:
         data = json.loads(js)
     except ValueError:
-        print("Error parsing json")
+        errors = errors + 1
+        sys.stdout.write('E')
+        #print("Error parsing json")
         continue
 
     if data["type"] == "command":
@@ -77,13 +82,15 @@ for line in f:
                     role = data["user"]["role"]
                     id = data["data"]["id"]
         except:
-            print("No id for " + data["action"])
+            sys.stdout.write('i')
+            #print("No id for " + data["action"])
 
         target = ""
         if action == "update-doc":
             target = data["data"]["updates"][0][0]
         if action == "upload-attachment":
-            target = data["data"]["attachmentType"]["type-id"]
+            if "attachmentType" in data["data"].keys():
+                target = data["data"]["attachmentType"]["type-id"]
 
         if id != "":
             if not id in ids.keys():
@@ -112,7 +119,16 @@ for line in f:
 outIds.write("applicationId\toriginalApplicationId\n")
 for idKey in ids.keys():
     id = ids[idKey]
-    outIds.write(id + "\t" + idKey + "\n")
+    if id is None or idKey is None:
+        print "Error: None:"
+        print("id")
+        print(id)
+        print("idKey")
+        print(idKey)
+    else:
+        outIds.write(id + "\t" + idKey + "\n")
 
 outIds.close()
 out.close()
+
+print "Errors: " + str(errors)

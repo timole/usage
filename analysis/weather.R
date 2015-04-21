@@ -1,8 +1,9 @@
 library("kohonen")
-setwd("C:/Users/timole/Dropbox/Timo/projektit/weatherscraper")
+#setwd("C:/Users/timole/Documents/Solita/N4S/Lupapiste-usage/usage/analysis")
+
 source("utils.R")
 
-weather <- read.csv("weather.csv",sep=",", encoding = "UTF-8")
+weather <- read.csv("../data/weather.csv",sep=",", encoding = "UTF-8")
 
 m <- as.matrix(weather[,2:6])
 rownames(m) <- weather[,1]

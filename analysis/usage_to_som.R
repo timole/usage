@@ -10,6 +10,12 @@ library(kohonen)
 #uf.sc <- scale(uf_matrix)
 #set.seed(7)
 #uf.som <- som(data = uf.sc)
+
+
+# <- isApplicationOk(uf, 100123)
+# <- ripApplicationInput(uf, 100123)
+
+
 Sys.time()
 uf[is.na(uf)] <- 0
 data_train <- uf[,-(1),drop=FALSE]
