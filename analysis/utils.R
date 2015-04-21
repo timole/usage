@@ -79,39 +79,3 @@ getDimensions <- function(somMap) {
   }
   return(matrices)
 }
-
-# Usage events of one application as a parameter.
-# Returns TRUE if there are no events by the role "applicant" after "submit-application"
-isApplicationOK <- function(data){
-	
-	# Flag for checking if "submit-application" has occurred.
-	appSubmitDone <- FALSE
-	
-	# Flag for checking if an event by the role "applicant" has occurred.
-	appOK <- TRUE
-	
-	# Order events by time.
-	ue <- ue[with(ue, order(datetime)), ]
-	
-	# Loop events
-	apply(data, 1, function(row) {
-		role <- row["role"]
-		action <- row["Action"]
-
-		# Mark as submitted if this event is the submitting one.
-		if( action == "submit-application" ){
-			appSubmitDone <- TRUE
-		}
-		
-		# Check if application has been submitted.
-		if(appSubmitDone){
-			
-			# Check if this event is by applicant.
-			if( role == "applicant" ){
-				# Mark application as NOT OK.
-				appOK <- FALSE
-			}
-		}
-	})
-	return(appOK)
-}
