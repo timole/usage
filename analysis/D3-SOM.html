@@ -29603,7 +29603,7 @@ file: js/controllers.js
 
     setTimeout(function() {
       $scope.dimensions = _.keys(data.somMap.dimensions);
-      $scope.dimension = "keskiarvo";
+      $scope.dimension = "(mean)";
       $scope.$apply();
       infovis.update($scope.dimension);
     }, 500);
@@ -29630,7 +29630,7 @@ file: main.html
     <div id="infovis-graph">
     </div>
 
-    <p>Dimension: {{dimension}}</p>
+    <p>Color by dimension: {{dimension}}</p>
 
     <select ng-model="dimension" ng-options="d for d in dimensions" ng-change="updateInfovis(dimension)"></select>
 
@@ -29946,7 +29946,7 @@ $(function() {
             mean[x][y] = sum / n;
           }
         }
-        data.somMap.dimensions["keskiarvo"] = mean;
+        data.somMap.dimensions["(mean)"] = mean;
 
         var itemsByLocation = new Array(som.xdim);
         for(x = 0; x < som.xdim; x++) {
