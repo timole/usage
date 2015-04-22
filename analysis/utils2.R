@@ -1,3 +1,14 @@
+fixAndSortUsageEventData <- function(ue) {
+  ue$datetime <- as.POSIXct(ue$datetime)
+  ue <- ue[!is.na(ue$applicationId),]
+  ue <- ue[with(ue, order(applicationId, datetime)), ]
+
+  # Merge action and target columns into one Action column
+  ue$Action <- paste(ue$action, ue$target)
+  ue[, "Action"] <- ue$Action
+  ue <- subset(ue, select = -c(action,target) )
+}
+
 # Usage events of one application as a parameter.
 # Returns TRUE if there are no events by the role "applicant" after "submit-application"
 isApplicationOK <- function(data){
@@ -50,10 +61,10 @@ appLeadtime <- function(data){
   # Store the time of the first usage event.
   firstEvent <- data[1,"datetime"]
   
-  # Find the row which has the "publish-verdict" event.
-  lastEvent <- data[which(data$Action == "publish-verdict "), "datetime"]
+  # Find the row which has the approval event.
+  lastEvent <- data[which(data$Action == "publish-verdict " | data$Action == "approve-application "), "datetime"]
   
-  # If there was no verdict published, return with 0.
+  # If there was no verdict published, return with NA.
   # TODO
   
   # Return leadtime
