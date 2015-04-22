@@ -1,4 +1,5 @@
 library("svUnit")
+library("plyr")
 
 source("../analysis/utils2.R")
 
@@ -8,6 +9,8 @@ source("../analysis/utils2.R")
 sue <- read.csv("../test/sampleUsageEvents.tsv", sep = "\t", row.names = NULL)
 sue <- fixAndSortUsageEventData(sue)
 
+print(sprintf("There are %d applications in the sample data", length(unique(sue$applicationId))))
+print(sue)
 
 test(appLeadtime) <- function() {
   out <- split( sue , f = sue$applicationId )
