@@ -12,32 +12,45 @@ fixAndSortUsageEventData <- function(ue) {
 # Usage events of one application as a parameter.
 # Returns TRUE if there are no events by the role "applicant" after "submit-application"
 isApplicationOK <- function(data){
+  # Applications are considered "OK"..
+  # *when they don't have usage events by applicant..
+  # *after the "submit-application" event AND..
+  # *excluding the following usage events:
+  #   "mark-seen"
+  #   "add-comment"
+  #   "fetch-validation-errors"
+  #   "invite-with-role"
+  #   "approve-invite"
+  #   "inform-construction-started"
+  #   "inform-construction-ready"
   
-  # Flag for checking if "submit-application" has occurred.
-  appSubmitDone <- FALSE
+  # Applications can be submitted only once. 
+  submissionTime <- NULL
   
-  # Submission time
-  submissionTime <- as.POSIXct("1970-01-01")
+  # A few events by the applicant are considered ok, even after the submission.
+  excludedEvents <- c("mark-seen ", "add-comment ", "fetch-validation-errors ",
+  "invite-with-role ", "approve-invite ", "inform-construction-started ",
+  "inform-construction-ready")
   
-  # Flag for checking if an event by the role "applicant" has occurred.
-  applicantEvent <- FALSE
-  
-  # Order events by time.
-  ue <- ue[with(ue, order(datetime)), ]
-  
-  # Check all events
+  # Check all events for submissions.
   apply(data, 1, function(row) {
-    role <- row["role"]
-    action <- row["Action"]
-    
-    
-    # Mark as submitted if this event is the submitting one.
-    # TODO Nyt ei oteta huomioon tilanteita, joissa submit tehdään uudestaan!
+  
+    # If this event is the submitting one..
     if( action == "submit-application " ){
-      appSubmitDone <- TRUE
+	  #..store the time of the submission.
       submissionTime <- row["datetime"]
     }
-    else if (role == "applicant" && difftime( row["datetime"], submissionTime) > 0){
+    
+  })
+  
+  # Check all events for usage by "applicant"..
+  apply(data, 1, function(row) {
+	
+	#..and if they occur after the submission time and if they're not included
+	# in our list of "OK-events".
+	if (row["role"] == "applicant" &&
+	  difftime( row["datetime"], submissionTime) > 0 &&
+	  !(is.element(row["Action"], excludedEvents))){
       
       # Applicant has usage event after submission. Therefore, the application
       # can't be an ideal one.
