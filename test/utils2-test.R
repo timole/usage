@@ -21,8 +21,11 @@ test(appLeadtime) <- function() {
 }
 (runTest(appLeadtime))
 
-# TODO: create a test for function isApplicationOK
 test(isApplicationOK) <- function() {
-  checkEqualsNumeric(123, 99999999)
+  out <- split( sue , f = sue$applicationId )
+  appOKs <- sapply( out, function(x) isApplicationOK( x ) )
+  print(appOKs)
+  checkEqualsNumeric(appOKs["100"], TRUE)
+  checkEqualsNumeric(appOKs["101"], FALSE)
 }
 (runTest(isApplicationOK))
