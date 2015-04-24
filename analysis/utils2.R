@@ -8,14 +8,25 @@ fixAndSortUsageEventData <- function(ue) {
 applicantHasNotModifiedAfterSubmission <- function(aue) {
   # Submission time
   submissionEvent <- aue[aue$action == "submit-application" & aue$role == "applicant",]
+  if(nrow(submissionEvent) == 0) {
+    return(F)
+  }
   lastModificationEvent <- tail(aue[aue$role == "applicant" & (aue$action == "update-doc" | aue$action == "upload-attachment"),], 1)
-  return(lastModificationEvent$datetime < submissionEvent$datetime)
+  if(nrow(lastModificationEvent) == 0) {
+    return(F)
+  }
+
+  if(lastModificationEvent$datetime < submissionEvent$datetime) {
+    return(T)
+  } else {
+    return(F)
+  }
 }
 
 
-# Usage events of one application as a parameter.
 # Returns TRUE if there are no events by the role "applicant" after "submit-application"
-isApplicationOk <- function(aue){
+isApplicationOk <- function(ue, applicationId){
+  aue <- ue[ue$applicationId == applicationId,]
   return(applicantHasNotModifiedAfterSubmission(aue))
 }
 

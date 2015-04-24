@@ -23,11 +23,11 @@ test(appLeadtime) <- function() {
 }
 (runTest(appLeadtime))
 
-test(isApplicationOK) <- function() {
-  checkEquals(isApplicationOk(sue[sue$applicationId == 100,]), T)
-  checkEquals(isApplicationOk(sue[sue$applicationId == 101,]), F)
+test(isApplicationOk) <- function() {
+  checkEquals(isApplicationOk(sue, 100), T)
+  checkEquals(isApplicationOk(sue, 101), F)
 }
-(runTest(isApplicationOK))
+(runTest(isApplicationOk))
 
 test(findApplicationsWithOkWorkflow) <- function() {
   okApps <- findApplicationsWithOkWorkflow(sue)
