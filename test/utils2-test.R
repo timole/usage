@@ -29,6 +29,20 @@ test(isApplicationOk) <- function() {
 }
 (runTest(isApplicationOk))
 
+test(applicantHasNotModifiedAfterSubmission) <- function() {
+  checkEquals(applicantHasNotModifiedAfterSubmission(sue, 100), T)
+  checkEquals(applicantHasNotModifiedAfterSubmission(sue, 101), F)
+}
+(runTest(applicantHasNotModifiedAfterSubmission))
+
+test(getApplicantModificationsAfterSubmission) <- function() {
+  am <- getApplicantModificationsAfterSubmission(sue, 101)
+  checkEquals(nrow(am), 1)
+  checkTrue(am$action == "update-doc")
+  checkTrue(am$target == "osoite.katu")
+}
+(runTest(getApplicantModificationsAfterSubmission))
+
 test(findApplicationsWithOkWorkflow) <- function() {
   okApps <- findApplicationsWithOkWorkflow(sue)
   

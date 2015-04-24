@@ -1,17 +1,20 @@
+MODIFICATION_ACTIONS <- c("update-doc", "upload-attachment")
+
 fixAndSortUsageEventData <- function(ue) {
   ue$datetime <- as.POSIXct(ue$datetime)
   ue <- ue[!is.na(ue$applicationId ),]
   ue <- ue[with(ue, order(applicationId, datetime)), ]
 }
 
+applicantHasNotModifiedAfterSubmission <- function(ue, applicationId) {
+  aue <- ue[ue$applicationId == applicationId,]
 
-applicantHasNotModifiedAfterSubmission <- function(aue) {
   # Submission time
-  submissionEvent <- aue[aue$action == "submit-application" & aue$role == "applicant",]
+  submissionEvent <- head(aue[aue$action == "submit-application" & aue$role == "applicant",], 1)
   if(nrow(submissionEvent) == 0) {
     return(F)
   }
-  lastModificationEvent <- tail(aue[aue$role == "applicant" & (aue$action == "update-doc" | aue$action == "upload-attachment"),], 1)
+  lastModificationEvent <- tail(aue[aue$role == "applicant" & (aue$action %in% MODIFICATION_ACTIONS),], 1)
   if(nrow(lastModificationEvent) == 0) {
     return(F)
   }
@@ -23,17 +26,28 @@ applicantHasNotModifiedAfterSubmission <- function(aue) {
   }
 }
 
+getApplicantModificationsAfterSubmission <- function(ue, applicationId) {
+  aue <- ue[ue$applicationId == applicationId,]
+
+  submissionEvent <- head(aue[aue$action == "submit-application" & aue$role == "applicant",], 1)
+  if(nrow(submissionEvent) == 0) {
+    return(NA)
+  }
+
+  events <- aue[aue$role == "applicant" & aue$action %in% (MODIFICATION_ACTIONS) & aue$datetime > submissionEvent$datetime,]
+  eventActionsAndTargets <- unique(events[,c("action", "target")])
+  return(eventActionsAndTargets)
+}
 
 # Returns TRUE if there are no events by the role "applicant" after "submit-application"
 isApplicationOk <- function(ue, applicationId){
-  aue <- ue[ue$applicationId == applicationId,]
-  return(applicantHasNotModifiedAfterSubmission(aue))
+  return(applicantHasNotModifiedAfterSubmission(ue, applicationId))
 }
 
 # return applicationIds of applications that follow the "normal" workflow
 findApplicationsWithOkWorkflow <- function(ue) {
-  haveSubmitApplication <- ue[ue$action == "submit-application",]$applicationId
-  havePublishVerdict <- ue[ue$action == "publish-verdict",]$applicationId
+  haveSubmitApplication <- ue[ue$role == "applicant" & ue$action == "submit-application",]$applicationId
+  havePublishVerdict <- ue[ue$role == "authority" & ue$action == "publish-verdict",]$applicationId
   return(intersect(haveSubmitApplication, havePublishVerdict))
 }
 
