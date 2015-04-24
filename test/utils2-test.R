@@ -23,22 +23,21 @@ test(appLeadtime) <- function() {
 }
 (runTest(appLeadtime))
 
-# TODO: create a test for function isApplicationOK
+source("../analysis/utils2.R")
 test(isApplicationOK) <- function() {
-  DEACTIVATED()
-  checkEqualsNumeric(123, 99999999)
+  checkEquals(isApplicationOk(getApplicationEvents(sue, 100)), T)
+  checkEquals(isApplicationOk(getApplicationEvents(sue, 101)), F)
 }
 (runTest(isApplicationOK))
 
 test(getApplicationEvents) <- function() {
-  ae <- getApplicationEvents(sue, 100)
-  checkEquals(nrow(ae), 8, "the amount of events for the application is known")
+  aue <- getApplicationEvents(sue, 100)
+  checkEquals(nrow(aue), 8, "the amount of events for the application is known")
 
-  ae <- getApplicationEvents(sue, 101)
-  checkEqualsNumeric(nrow(ae), 10, "the amount of events for the application is known")
+  aue <- getApplicationEvents(sue, 101)
+  checkEqualsNumeric(nrow(aue), 10, "the amount of events for the application is known")
 }
 (runTest(getApplicationEvents))
-
 
 print("###################################### Summary #########################################")
 errorLog()

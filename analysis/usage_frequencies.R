@@ -1,10 +1,10 @@
+source("../analysis/utils2.R")
+
 # Import usage evenets data into "ue" in RStudio or.. do the following
 #setwd("\\\\intra.tut.fi/home/suonsyrj/My Documents/Publications/2015_ICIS/usage/analysis")
 #setwd("C:/Users/timole/Documents/Solita/N4S/Lupapiste-usage/usage/analysis")
 ue <- read.csv("../data/lupapiste-usage-events-all-20150414.tsv", sep = "\t", row.names = NULL)
 ue <- fixAndSortUsageEventData(ue)
-
-source("../analysis/utils2.R")
 
 #----Count the lead times of each application----------------------------------
 out <- split( ue , f = ue$applicationId )
