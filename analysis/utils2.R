@@ -6,8 +6,6 @@ fixAndSortUsageEventData <- function(ue) {
 
 
 applicantHasNotModifiedAfterSubmission <- function(aue) {
-  print(aue)
-  
   # Submission time
   submissionEvent <- aue[aue$action == "submit-application" & aue$role == "applicant",]
   lastModificationEvent <- tail(aue[aue$role == "applicant" & (aue$action == "update-doc" | aue$action == "upload-attachment"),], 1)
