@@ -18,7 +18,14 @@ applicantHasNotModifiedAfterSubmission <- function(aue) {
 isApplicationOk <- function(aue){
   return(applicantHasNotModifiedAfterSubmission(aue))
 }
-  
+
+# return applicationIds of applications that follow the "normal" workflow
+findApplicationsWithOkWorkflow <- function(ue) {
+  haveSubmitApplication <- ue[ue$action == "submit-application",]$applicationId
+  havePublishVerdict <- ue[ue$action == "publish-verdict",]$applicationId
+  return(intersect(haveSubmitApplication, havePublishVerdict))
+}
+
 
 #------------------------------------------------------------------------------
 # Usage events of one application as a parameter.
