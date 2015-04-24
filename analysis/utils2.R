@@ -26,6 +26,11 @@ findApplicationsWithOkWorkflow <- function(ue) {
   return(intersect(haveSubmitApplication, havePublishVerdict))
 }
 
+getApplicationEventsBeforeSubmission <- function(aue) {
+  submitEvent <- aue[aue$action == "submit-application",]
+  before <- aue[aue$datetime < submitEvent$datetime,]
+  return(before)
+}
 
 #------------------------------------------------------------------------------
 # Usage events of one application as a parameter.

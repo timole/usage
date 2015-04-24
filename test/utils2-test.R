@@ -41,5 +41,11 @@ test(findApplicationsWithOkWorkflow) <- function() {
 }
 (runTest(findApplicationsWithOkWorkflow))
 
+test(getApplicationEventsBeforeSubmission) <- function() {
+  checkEquals(nrow(getApplicationEventsBeforeSubmission(sue[sue$applicationId == 100,])), 3)
+  checkEquals(nrow(getApplicationEventsBeforeSubmission(sue[sue$applicationId == 101,])), 4)
+}
+(runTest(getApplicationEventsBeforeSubmission))
+
 print("###################################### Summary #########################################")
 errorLog()

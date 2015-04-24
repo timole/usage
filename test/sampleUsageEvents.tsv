@@ -15,6 +15,7 @@
 2015-02-11 15:00:59;122333;"applicant";"";"create-application";""
 2015-02-11 15:08:24;122333;"applicant";"101";"update-doc";"henkilotiedot.etunimi"
 2015-02-11 15:08:32;122333;"applicant";"101";"update-doc";"henkilotiedot.sukunimi"
+2015-02-11 15:08:33;122333;"applicant";"101";"update-doc";"henkilotiedot.keskinimi"
 2015-02-11 15:08:48;122333;"applicant";"101";"update-doc";"osoite.katu"
 2015-02-12 09:37:49;122333;"applicant";"101";"submit-application";""
 2015-02-13 09:54:59;999888;"authority";"101";"assign-application";""
