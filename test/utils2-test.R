@@ -5,7 +5,7 @@ source("../analysis/utils2.R")
 
 clearLog()
 
-# sample data: 
+# sample data:
 #   application 100 is ok and approved
 #   application 101 fails and then approved
 sue <- read.csv("../test/sampleUsageEvents.tsv", sep = ";", row.names = NULL)
@@ -38,6 +38,13 @@ test(getApplicationEvents) <- function() {
   checkEqualsNumeric(nrow(aue), 10, "the amount of events for the application is known")
 }
 (runTest(getApplicationEvents))
+
+test(isWorkflowOK) <- function() {
+  checkEquals(isWorkflowOK(getApplicationEvents(sue, 100)), F))
+  checkEquals(isWorkflowOK(getApplicationEvents(sue, 101)), F))
+  checkEquals(isWorkflowOK(getApplicationEvents(sue, 102)), T))
+}
+(runTest(isWorkflowOK))
 
 print("###################################### Summary #########################################")
 errorLog()
