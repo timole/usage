@@ -5,9 +5,7 @@ source("../analysis/utils2.R")
 
 clearLog()
 
-# sample data: 
-#   application 100 is ok and approved
-#   application 101 fails and then approved
+# sample usage events: 
 sue <- read.csv("../test/sampleUsageEvents.tsv", sep = ";", row.names = NULL)
 sue <- fixAndSortUsageEventData(sue)
 
@@ -48,42 +46,72 @@ test(getApplicantModificationsAfterSubmission) <- function() {
 test(findApplicationsWithOkWorkflow) <- function() {
   okApps <- findApplicationsWithOkWorkflow(sue)
   
-  checkEquals(length(okApps), 4)
+  checkEquals(length(okApps), 5)
   checkEquals(100 %in% okApps, T)
   checkEquals(101 %in% okApps, T)
   checkEquals(102 %in% okApps, T)
   checkEquals(103 %in% okApps, F) #no submit-application
   checkEquals(104 %in% okApps, F) #no publish-verdict
   checkEquals(105 %in% okApps, T)
+  checkEquals(106 %in% okApps, T)
 }
 (runTest(findApplicationsWithOkWorkflow))
 
-test(getApplicationEventsBeforeSubmission) <- function() {
-  checkEquals(nrow(getApplicationEventsBeforeSubmission(sue[sue$applicationId == 100,])), 3)
-  checkEquals(nrow(getApplicationEventsBeforeSubmission(sue[sue$applicationId == 101,])), 4)
+test(getApplicantModificationsBeforeSubmission) <- function() {
+  mods <- getApplicantModificationsBeforeSubmission(sue, 100)
+  print(mods)
+  checkEquals(nrow(mods), 3)
+  checkEquals(nrow(getApplicantModificationsBeforeSubmission(sue, 101)), 4)
 }
-(runTest(getApplicationEventsBeforeSubmission))
+(runTest(getApplicantModificationsBeforeSubmission))
+
+
+test(toActionTarget) <- function() {
+  mods <- getApplicantModificationsBeforeSubmission(sue, 105)
+  actionTargets <- toActionTarget(mods)
+  checkEquals(length(actionTargets), 4)
+  checkEquals("a-pohjapiirrustus" %in% actionTargets, T)
+  checkEquals("d-henkilotiedot.sukunimi" %in% actionTargets, T)
+  checkEquals("d-henkilotiedot.keskinimi" %in% actionTargets, T)
+  checkEquals("d-osoite.katu" %in% actionTargets, T)
+}
+(runTest(toActionTarget))
 
 test(findApplicationOkState) <- function() {
   apps <- findApplicationOkState(sue)
-  checkEquals(nrow(apps), 4)
+  checkEquals(nrow(apps), 5)
   checkTrue(c(100, 101, 102, 105) %in% apps$applicationId)
   checkEquals(apps[apps$applicationId == 100,]$isOk, T)
   checkEquals(apps[apps$applicationId == 101,]$isOk, F)
   checkEquals(apps[apps$applicationId == 102,]$isOk, F)
   checkEquals(apps[apps$applicationId == 105,]$isOk, F)
+  checkEquals(apps[apps$applicationId == 106,]$isOk, F)
 }
 (runTest(findApplicationOkState))
 
-source("../analysis/utils2.R")
 test(getSubmissionFaults) <- function() {
   apps <- findApplicationOkState(sue)
   failing <- apps[apps$isOk == F,]
   faults <- getSubmissionFaults(sue, failing$applicationId)
-  print("faults")
-  print(faults)
 }
 (runTest(getSubmissionFaults))
+
+source("../analysis/utils2.R")
+test(getApplicationsApplicantModificationsBeforeSubmission) <- function() {
+  apps <- findApplicationOkState(sue)
+  applicationIds <- apps$applicationId
+  bs <- getApplicationsApplicantModificationsBeforeSubmission(sue, applicationIds)
+  bs$actionTarget <- toActionTarget(bs)
+  print(bs)
+}
+(runTest(getApplicationsApplicantModificationsBeforeSubmission))
+
+test(getApplicationInfo) <- function() {
+  ats <- getApplicationInfo(sue)
+  print(ats)
+}
+(runTest(getApplicationInfo))
+
 
 
 print("###################################### Summary #########################################")

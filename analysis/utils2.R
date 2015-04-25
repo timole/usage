@@ -36,10 +36,42 @@ findApplicationsWithOkWorkflow <- function(ue) {
   return(intersect(haveSubmitApplication, havePublishVerdict))
 }
 
-getApplicationEventsBeforeSubmission <- function(aue) {
+getApplicantModificationsBeforeSubmission <- function(ue, applicationId) {
+  aue <- ue[ue$applicationId == applicationId,]
+
   submitEvent <- aue[aue$action == "submit-application",]
   before <- aue[aue$datetime < submitEvent$datetime,]
-  return(before)
+  modifications <- before[before$action %in% MODIFICATION_ACTIONS,]
+  return(modifications)
+}
+
+getApplicationsApplicantModificationsBeforeSubmission <- function(ue, applicationIds) {
+  appInput <- data.frame()
+  for(applicationId in applicationIds) {
+    print(sprintf("Get modifications for application %d", applicationId))
+    mods <- getApplicantModificationsBeforeSubmission(ue, applicationId)
+    appInput <- rbind(appInput, mods)
+  }
+  return(appInput)
+}
+
+getApplicationInfo <- function(ue) {
+  apps <- findApplicationOkState(ue)
+  applicationIds <- apps$applicationId
+  ats <- getApplicationsApplicantModificationsBeforeSubmission(ue, applicationIds)
+  ats$actionTarget <- toActionTarget(ats)
+  ats <- ats[c("applicationId", "actionTarget")]
+  ats <- as.data.frame(table(ats))
+  ats <- reshape(ats, v.names="Freq", idvar="applicationId", timevar="actionTarget", direction="wide")
+
+  colnames(ats) <- sub("Freq.", "", colnames(ats))
+  ats[is.na(ats)] <- 0  
+  ats <- merge(ats, apps, by = "applicationId")
+  return(ats)
+}
+
+toActionTarget <- function(ue) {
+  return(paste(ifelse(ue$action == "update-doc", "d", ifelse(ue$action == "upload-attachment", "a", "UNKNOWN")), ue$target, sep = "-"))
 }
 
 findApplicationOkState <- function(ue) {
