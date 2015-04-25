@@ -5,14 +5,9 @@ source("../analysis/utils2.R")
 ue <- read.csv("../data/lupapiste-usage-events-all-20150414.tsv", sep = "\t", row.names = NULL)
 ue <- fixAndSortUsageEventData(ue)
 
-okIds <- findApplicationsWithOkWorkflow(ue)
+apps <- findApplicationOkState(ue)
+failingAppIds <- apps[apps$isOk == F,]$applicationId
+faults <- getSubmissionFaults(ue, failingAppIds)
 
-apps <- as.data.frame(okIds)
-
-apps$isOk <- apply(apps, 1, function(applicationId) {
-  print(sprintf("Application %d", applicationId))
-  flush.console()
-  isApplicationOk(ue, applicationId)
-})
-
-colnames(apps) <- c("applicationId", "isOk")
+print("reasons why applications with ok workflows fail")
+print(faults)

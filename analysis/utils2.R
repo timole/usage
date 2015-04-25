@@ -6,24 +6,9 @@ fixAndSortUsageEventData <- function(ue) {
   ue <- ue[with(ue, order(applicationId, datetime)), ]
 }
 
-applicantHasNotModifiedAfterSubmission <- function(ue, applicationId) {
-  aue <- ue[ue$applicationId == applicationId,]
-
-  # Submission time
-  submissionEvent <- head(aue[aue$action == "submit-application" & aue$role == "applicant",], 1)
-  if(nrow(submissionEvent) == 0) {
-    return(F)
-  }
-  lastModificationEvent <- tail(aue[aue$role == "applicant" & (aue$action %in% MODIFICATION_ACTIONS),], 1)
-  if(nrow(lastModificationEvent) == 0) {
-    return(F)
-  }
-
-  if(lastModificationEvent$datetime < submissionEvent$datetime) {
-    return(T)
-  } else {
-    return(F)
-  }
+applicantHasModifiedAfterSubmission <- function(ue, applicationId) {
+  modifications <- getApplicantModificationsAfterSubmission(ue, applicationId)
+  return(nrow(modifications) > 0)
 }
 
 getApplicantModificationsAfterSubmission <- function(ue, applicationId) {
@@ -41,7 +26,7 @@ getApplicantModificationsAfterSubmission <- function(ue, applicationId) {
 
 # Returns TRUE if there are no events by the role "applicant" after "submit-application"
 isApplicationOk <- function(ue, applicationId){
-  return(applicantHasNotModifiedAfterSubmission(ue, applicationId))
+  return(! applicantHasModifiedAfterSubmission(ue, applicationId))
 }
 
 # return applicationIds of applications that follow the "normal" workflow
@@ -55,6 +40,30 @@ getApplicationEventsBeforeSubmission <- function(aue) {
   submitEvent <- aue[aue$action == "submit-application",]
   before <- aue[aue$datetime < submitEvent$datetime,]
   return(before)
+}
+
+findApplicationOkState <- function(ue) {
+  okIds <- findApplicationsWithOkWorkflow(ue)
+  apps <- as.data.frame(okIds)
+  apps$isOk <- apply(apps, 1, function(applicationId) {
+    print(sprintf("Application %d", applicationId))
+    flush.console()
+    isApplicationOk(ue, applicationId)
+  })
+  colnames(apps) <- c("applicationId", "isOk")
+  return(apps)
+}
+
+getSubmissionFaults <- function(ue, applicationIds) {
+  faults <- ue[0:0,]
+  for(applicationId in applicationIds) {
+    f <- getApplicantModificationsAfterSubmission(ue, applicationId)
+    f$applicationId <- applicationId
+    f <- f[c("applicationId", "action", "target")]
+    faults <- rbind(faults, f)
+    flush.console()
+  }
+  return(faults)
 }
 
 #------------------------------------------------------------------------------

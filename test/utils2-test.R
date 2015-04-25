@@ -29,12 +29,14 @@ test(isApplicationOk) <- function() {
 }
 (runTest(isApplicationOk))
 
-test(applicantHasNotModifiedAfterSubmission) <- function() {
-  checkEquals(applicantHasNotModifiedAfterSubmission(sue, 100), T)
-  checkEquals(applicantHasNotModifiedAfterSubmission(sue, 101), F)
+test(applicantHasModifiedAfterSubmission) <- function() {
+  checkEquals(applicantHasModifiedAfterSubmission(sue, 100), F)
+  checkEquals(applicantHasModifiedAfterSubmission(sue, 101), T)
 }
-(runTest(applicantHasNotModifiedAfterSubmission))
+(runTest(applicantHasModifiedAfterSubmission))
 
+
+source("../analysis/utils2.R")
 test(getApplicantModificationsAfterSubmission) <- function() {
   am <- getApplicantModificationsAfterSubmission(sue, 101)
   checkEquals(nrow(am), 1)
@@ -46,12 +48,13 @@ test(getApplicantModificationsAfterSubmission) <- function() {
 test(findApplicationsWithOkWorkflow) <- function() {
   okApps <- findApplicationsWithOkWorkflow(sue)
   
-  checkEquals(length(okApps), 3)
+  checkEquals(length(okApps), 4)
   checkEquals(100 %in% okApps, T)
   checkEquals(101 %in% okApps, T)
   checkEquals(102 %in% okApps, T)
   checkEquals(103 %in% okApps, F) #no submit-application
   checkEquals(104 %in% okApps, F) #no publish-verdict
+  checkEquals(105 %in% okApps, T)
 }
 (runTest(findApplicationsWithOkWorkflow))
 
@@ -60,6 +63,28 @@ test(getApplicationEventsBeforeSubmission) <- function() {
   checkEquals(nrow(getApplicationEventsBeforeSubmission(sue[sue$applicationId == 101,])), 4)
 }
 (runTest(getApplicationEventsBeforeSubmission))
+
+test(findApplicationOkState) <- function() {
+  apps <- findApplicationOkState(sue)
+  checkEquals(nrow(apps), 4)
+  checkTrue(c(100, 101, 102, 105) %in% apps$applicationId)
+  checkEquals(apps[apps$applicationId == 100,]$isOk, T)
+  checkEquals(apps[apps$applicationId == 101,]$isOk, F)
+  checkEquals(apps[apps$applicationId == 102,]$isOk, F)
+  checkEquals(apps[apps$applicationId == 105,]$isOk, F)
+}
+(runTest(findApplicationOkState))
+
+source("../analysis/utils2.R")
+test(getSubmissionFaults) <- function() {
+  apps <- findApplicationOkState(sue)
+  failing <- apps[apps$isOk == F,]
+  faults <- getSubmissionFaults(sue, failing$applicationId)
+  print("faults")
+  print(faults)
+}
+(runTest(getSubmissionFaults))
+
 
 print("###################################### Summary #########################################")
 errorLog()
