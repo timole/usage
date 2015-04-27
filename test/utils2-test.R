@@ -96,7 +96,6 @@ test(getSubmissionFaults) <- function() {
 }
 (runTest(getSubmissionFaults))
 
-source("../analysis/utils2.R")
 test(getApplicationsApplicantModificationsBeforeSubmission) <- function() {
   apps <- findApplicationOkState(sue)
   applicationIds <- apps$applicationId
@@ -106,6 +105,7 @@ test(getApplicationsApplicantModificationsBeforeSubmission) <- function() {
 }
 (runTest(getApplicationsApplicantModificationsBeforeSubmission))
 
+source("../analysis/utils2.R")
 test(getApplicationInfo) <- function() {
   ats <- getApplicationInfo(sue)
   print(ats)

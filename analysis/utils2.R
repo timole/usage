@@ -31,15 +31,16 @@ isApplicationOk <- function(ue, applicationId){
 
 # return applicationIds of applications that follow the "normal" workflow
 findApplicationsWithOkWorkflow <- function(ue) {
-  haveSubmitApplication <- ue[ue$role == "applicant" & ue$action == "submit-application",]$applicationId
-  havePublishVerdict <- ue[ue$role == "authority" & ue$action == "publish-verdict",]$applicationId
-  return(intersect(haveSubmitApplication, havePublishVerdict))
+  haveSubmitApplication <- unique(ue[ue$role == "applicant" & ue$action == "submit-application",]$applicationId)
+  havePublishVerdict <- unique(ue[ue$role == "authority" & ue$action == "publish-verdict",]$applicationId)
+  haveCheckForVerdict <- unique(ue[ue$role == "authority" & ue$action == "check-for-verdict",]$applicationId)
+  return(intersect(haveSubmitApplication, union(havePublishVerdict, haveCheckForVerdict)))
 }
 
 getApplicantModificationsBeforeSubmission <- function(ue, applicationId) {
   aue <- ue[ue$applicationId == applicationId,]
 
-  submitEvent <- aue[aue$action == "submit-application",]
+  submitEvent <- head(aue[aue$action == "submit-application",], 1)
   before <- aue[aue$datetime < submitEvent$datetime,]
   modifications <- before[before$action %in% MODIFICATION_ACTIONS,]
   return(modifications)
