@@ -33,8 +33,9 @@ isApplicationOk <- function(ue, applicationId){
 findApplicationsWithOkWorkflow <- function(ue) {
   haveSubmitApplication <- unique(ue[ue$role == "applicant" & ue$action == "submit-application",]$applicationId)
   havePublishVerdict <- unique(ue[ue$role == "authority" & ue$action == "publish-verdict",]$applicationId)
+  haveBatchGiveVerdict <- unique(ue[ue$role == "system" & ue$action == "batch-give-verdict",]$applicationId)
   haveCheckForVerdict <- unique(ue[ue$role == "authority" & ue$action == "check-for-verdict",]$applicationId)
-  return(intersect(haveSubmitApplication, union(havePublishVerdict, haveCheckForVerdict)))
+  return(intersect(haveSubmitApplication, union(haveCheckForVerdict, union(havePublishVerdict, haveBatchGiveVerdict))))
 }
 
 getApplicantModificationsBeforeSubmission <- function(ue, applicationId) {
