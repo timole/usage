@@ -63,9 +63,19 @@ print(highlyCorrelated)
 apps.df <- applicationInfo[ -highlyCorrelated ]
 
 #----RandomForest---------------------------
-#apps.rf <- randomForest(isOk ~ ., data=apps.df, importance=TRUE, proximity=TRUE)
+#apps.rf <- randomForest(isOk ~ .-isOk, data=apps.df, importance=TRUE, proximity=TRUE)
 #print(apps.rf)
 
 set.seed(17)
 apps.urf <- randomForest(apps.df[, -194])
 MDSplot(apps.urf, apps.df$isOk)
+
+#--------Rpart----------------------
+#install.packages('rattle')
+#install.packages('rpart.plot')
+#install.packages('RColorBrewer')
+library(rattle)
+library(rpart.plot)
+library(RColorBrewer)
+fit <- rpart(isOk ~ .-isOk, data=apps.df, method="class", control=rpart.control(minsplit=20, cp=0.001))
+fancyRpartPlot(fit)
