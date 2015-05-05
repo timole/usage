@@ -23,12 +23,14 @@ outIds = open(outputfilenameIds, "w")
 
 columnNames = parseColumnNames(f)
 print("Column names")
+
+
 i = 0
 for col in columnNames:
     print `i` + ": " + col
     i = i + 1
 
-out.write("datetime\tuserId\trole\tapplicationId\taction\ttarget\n")
+out.write("datetime\tuserId\trole\tmunicipalityId\tapplicationId\taction\ttarget\n")
 
 ids = {}
 idSeq = 100000
@@ -110,12 +112,16 @@ for line in f:
         else:
             pubId = ""
 
+        municipalityId = ""
+        if id != "":
+            municipalityId = id.split('-')[1]
+
         if not userId in userIds.keys():
             userIds[userId] = str(userIdSeq)
             userIdSeq = userIdSeq + 1
         pubUserId = userIds[userId]
 
-        l = datetime + "\t" + pubUserId + "\t" + role + "\t" + pubId + "\t" + action + "\t" + target + "\n"
+        l = datetime + "\t" + pubUserId + "\t" + role + "\t" + municipalityId + "\t" + pubId + "\t" + action + "\t" + target + "\n"
 #        print(l)
         out.write(l)
 
@@ -124,6 +130,7 @@ for line in f:
     if parsed % 1000 == 0:
         sys.stdout.write('.')
         sys.stdout.flush()
+
 
 columnNames = parseColumnNames(fcron)
 for line in fcron:
