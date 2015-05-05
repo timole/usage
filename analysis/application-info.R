@@ -23,6 +23,7 @@ date()
 m  <- as.matrix(applicationInfo[,2:(ncol(applicationInfo) - 2)])
 rownames(m) <- paste(ifelse(applicationInfo$isOk, "OK", "FAIL"), applicationInfo$applicationId, sep = "-")
 
+#----SOM------------------------------------
 set.seed(7)
 kohmap <- som(data = m, grid = somgrid(6, 4, "hexagonal"), rlen = 100)
 par(mfrow=c(2,2))
@@ -40,3 +41,41 @@ df <- as.data.frame(kohmap$data)
 df$id <- rownames(df)
 write.csv(df, "items.csv", row.names = F)
 
+#----Preprocessing for RF-------------------
+#install.packages("caret", dependencies = c("Depends", "Suggests"))
+library(mlbench)
+library(caret)
+
+# Application IDs relocated from first column to rownames.
+rownames(applicationInfo) <- applicationInfo[,1]
+applicationInfo[,1] <- NULL
+
+# calculate correlation matrix
+correlationMatrix <- cor(applicationInfo)
+# summarize the correlation matrix
+print(correlationMatrix)
+# find attributes that are highly corrected (ideally >0.75)
+highlyCorrelated <- findCorrelation(correlationMatrix, cutoff=0.5)
+# print indexes of highly correlated attributes
+print(highlyCorrelated)
+
+#Remove columns with correlations to eachother!?
+apps.df <- applicationInfo[ -highlyCorrelated ]
+
+#----RandomForest---------------------------
+#apps.rf <- randomForest(isOk ~ .-isOk, data=apps.df, importance=TRUE, proximity=TRUE)
+#print(apps.rf)
+
+set.seed(17)
+apps.urf <- randomForest(apps.df[, -194])
+MDSplot(apps.urf, apps.df$isOk)
+
+#--------Rpart----------------------
+#install.packages('rattle')
+#install.packages('rpart.plot')
+#install.packages('RColorBrewer')
+library(rattle)
+library(rpart.plot)
+library(RColorBrewer)
+fit <- rpart(isOk ~ .-isOk, data=apps.df, method="class", control=rpart.control(minsplit=20, cp=0.001))
+fancyRpartPlot(fit)
