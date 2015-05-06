@@ -15,11 +15,13 @@ inputFilename = sys.argv[1]
 inputFilenameCron = sys.argv[2]
 outputfilename = sys.argv[3]
 outputfilenameIds = sys.argv[4]
+outputfilenameMunicipalityIds = sys.argv[5]
 
 f = open(inputFilename, "r")
 fcron = open(inputFilenameCron, "r")
 out = open(outputfilename, "w")
 outIds = open(outputfilenameIds, "w")
+outMunicipalityIds = open(outputfilenameMunicipalityIds, "w")
 
 columnNames = parseColumnNames(f)
 print("Column names")
@@ -34,6 +36,9 @@ out.write("datetime\tuserId\trole\tmunicipalityId\tapplicationId\taction\ttarget
 
 ids = {}
 idSeq = 100000
+
+municipalityIds = {}
+municipalityIdSeq = 1000
 
 userIds = {}
 userIdSeq = 100000
@@ -112,16 +117,23 @@ for line in f:
         else:
             pubId = ""
 
+        pubMunicipalityId = ""
         municipalityId = ""
         if id != "":
-            municipalityId = id.split('-')[1]
+            if id is not None and len(id.split('-')) == 4:
+                municipalityId = id.split('-')[1]
+                if not municipalityId in municipalityIds.keys():
+                    municipalityIds[municipalityId] = str(municipalityIdSeq)
+                    municipalityIdSeq = municipalityIdSeq + 1
+
+                pubMunicipalityId = municipalityIds[municipalityId]
 
         if not userId in userIds.keys():
             userIds[userId] = str(userIdSeq)
             userIdSeq = userIdSeq + 1
         pubUserId = userIds[userId]
 
-        l = datetime + "\t" + pubUserId + "\t" + role + "\t" + municipalityId + "\t" + pubId + "\t" + action + "\t" + target + "\n"
+        l = datetime + "\t" + pubUserId + "\t" + role + "\t" + pubMunicipalityId + "\t" + pubId + "\t" + action + "\t" + target + "\n"
 #        print(l)
         out.write(l)
 
@@ -190,6 +202,19 @@ for idKey in ids.keys():
     else:
         outIds.write(id + "\t" + idKey + "\n")
 
+outMunicipalityIds.write("municipalityId\toriginalMunicipalityId\n")
+for idKey in municipalityIds.keys():
+    id = municipalityIds[idKey]
+    if id is None or idKey is None:
+        print "Error: None:"
+        print("id")
+        print(id)
+        print("idKey")
+        print(idKey)
+    else:
+        outMunicipalityIds.write(id + "\t" + idKey + "\n")
+
+outMunicipalityIds.close()
 outIds.close()
 out.close()
 
