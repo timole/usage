@@ -3,6 +3,7 @@ MODIFICATION_ACTIONS <- c("update-doc", "upload-attachment")
 fixAndSortUsageEventData <- function(ue) {
   ue$datetime <- as.POSIXct(ue$datetime)
   ue <- ue[!is.na(ue$applicationId ),]
+  #ue <- ue[!is.na(ue$municipalityId ),]
   ue <- ue[with(ue, order(applicationId, datetime)), ]
 }
 
@@ -50,7 +51,7 @@ getApplicantModificationsBeforeSubmission <- function(ue, applicationId) {
 getApplicationsApplicantModificationsBeforeSubmission <- function(ue, applicationIds) {
   appInput <- data.frame()
   for(applicationId in applicationIds) {
-    print(sprintf("Get modifications for application %d", applicationId))
+    #print(sprintf("Get modifications for application %d", applicationId))
     mods <- getApplicantModificationsBeforeSubmission(ue, applicationId)
     appInput <- rbind(appInput, mods)
   }
@@ -63,8 +64,10 @@ getApplicationInfo <- function(ue) {
   ats <- getApplicationsApplicantModificationsBeforeSubmission(ue, applicationIds)
   ats$actionTarget <- toActionTarget(ats)
   ats <- ats[c("applicationId", "actionTarget")]
+  #ats <- ats[c("applicationId", "municipalityId", "actionTarget")]
   ats <- as.data.frame(table(ats))
   ats <- reshape(ats, v.names="Freq", idvar="applicationId", timevar="actionTarget", direction="wide")
+  #ats <- reshape(ats, v.names="Freq", idvar=c("applicationId", "municipalityId"), timevar="actionTarget", direction="wide")
 
   colnames(ats) <- sub("Freq.", "", colnames(ats))
   ats[is.na(ats)] <- 0  
@@ -80,7 +83,7 @@ findApplicationOkState <- function(ue) {
   okIds <- findApplicationsWithOkWorkflow(ue)
   apps <- as.data.frame(okIds)
   apps$isOk <- apply(apps, 1, function(applicationId) {
-    print(sprintf("Application %d", applicationId))
+    #print(sprintf("Application %d", applicationId))
     flush.console()
     isApplicationOk(ue, applicationId)
   })
